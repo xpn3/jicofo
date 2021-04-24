@@ -40,8 +40,8 @@ VERSION=$VERSIONMAJ-$BUILD_NUMBER
 echo "Package version: ${VERSION}"
 
 REV=$(git log --pretty=format:'%h' -n 1)
-dch -v "$VERSION-1" "Build from git. $REV"
-dch -D unstable -r ""
+dch -b -v "$VERSION-1" "Build from git. $REV"
+dch -b -D unstable -r ""
 
 # We need to make sure all dependencies are downloaded before start building
 # the debian package
