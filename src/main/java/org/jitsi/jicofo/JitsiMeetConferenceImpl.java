@@ -19,6 +19,8 @@ package org.jitsi.jicofo;
 
 import org.jetbrains.annotations.*;
 import org.jitsi.jicofo.bridge.*;
+import org.jitsi.jicofo.schisming.SchismingHub;
+import org.jitsi.jicofo.schisming.SchismingHubImpl;
 import org.jitsi.jicofo.version.*;
 import org.jitsi.osgi.*;
 import org.jitsi.utils.*;
@@ -141,6 +143,11 @@ public class JitsiMeetConferenceImpl
      * Conference room chat instance.
      */
     private volatile ChatRoom2 chatRoom;
+
+    /**
+     * Conference schisming hub instance.
+     */
+    private final SchismingHub schismingHub;
 
     /**
      * Operation set used to handle Jingle sessions with conference
@@ -305,6 +312,9 @@ public class JitsiMeetConferenceImpl
             logger.setLevel(logLevel);
         }
         this.includeInStatistics = includeInStatistics;
+        logger.info("Created new conference, roomJid=" + roomName);
+
+        this.schismingHub = new SchismingHubImpl();
     }
 
     public JitsiMeetConferenceImpl(
@@ -712,6 +722,8 @@ public class JitsiMeetConferenceImpl
                     participant,
                     false,
                     hasToStartMuted(participant, justJoined));
+
+            schismingHub.register(participant);
         }
     }
 
