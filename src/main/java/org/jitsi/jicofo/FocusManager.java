@@ -24,6 +24,7 @@ import org.jetbrains.annotations.*;
 import org.jitsi.impl.protocol.xmpp.*;
 import org.jitsi.jicofo.health.*;
 import org.jitsi.jicofo.recording.jibri.*;
+import org.jitsi.jicofo.schisming.SchismingHubImpl;
 import org.jitsi.jicofo.stats.*;
 import org.jitsi.jicofo.xmpp.*;
 import org.jitsi.protocol.xmpp.*;
@@ -367,6 +368,7 @@ public class FocusManager
                     this, config, logLevel,
                     id, includeInStatistics);
 
+            conference.setSchismingHub(new SchismingHubImpl());
             conferences.put(room, conference);
             conferenceGids.add(id);
         }

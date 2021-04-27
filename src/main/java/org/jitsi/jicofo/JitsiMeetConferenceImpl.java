@@ -147,7 +147,7 @@ public class JitsiMeetConferenceImpl
     /**
      * Conference schisming hub instance.
      */
-    private final SchismingHub schismingHub;
+    private SchismingHub schismingHub;
 
     /**
      * Operation set used to handle Jingle sessions with conference
@@ -313,8 +313,6 @@ public class JitsiMeetConferenceImpl
         }
         this.includeInStatistics = includeInStatistics;
         logger.info("Created new conference, roomJid=" + roomName);
-
-        this.schismingHub = new SchismingHubImpl();
     }
 
     public JitsiMeetConferenceImpl(
@@ -329,6 +327,10 @@ public class JitsiMeetConferenceImpl
     {
        this(roomName, focusUserName, protocolProviderHandler, jvbXmppConnection,
             listener, config, logLevel, gid, false);
+    }
+
+    public void setSchismingHub(SchismingHub schismingHub) {
+        this.schismingHub = schismingHub;
     }
 
     /**
