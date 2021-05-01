@@ -17,6 +17,9 @@ public class SchismingHubImpl implements SchismingHub {
 
     @Override
     public void register(Participant participant) {
+        if(participant == null) {
+            return;
+        }
         logger.info("register participant: " + participant.toString());
     }
 }
