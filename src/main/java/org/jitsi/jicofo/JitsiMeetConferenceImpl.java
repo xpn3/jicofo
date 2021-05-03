@@ -19,6 +19,7 @@ package org.jitsi.jicofo;
 
 import org.jetbrains.annotations.*;
 import org.jitsi.jicofo.bridge.*;
+import org.jitsi.jicofo.schisming.ParticipantAlreadyRegisteredException;
 import org.jitsi.jicofo.schisming.SchismingHub;
 import org.jitsi.jicofo.schisming.SchismingHubImpl;
 import org.jitsi.jicofo.version.*;
@@ -725,7 +726,11 @@ public class JitsiMeetConferenceImpl
                     false,
                     hasToStartMuted(participant, justJoined));
 
-            schismingHub.register(participant);
+            try {
+                schismingHub.register(participant);
+            } catch (ParticipantAlreadyRegisteredException e) {
+                e.printStackTrace();
+            }
         }
     }
 

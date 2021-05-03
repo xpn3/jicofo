@@ -5,28 +5,44 @@ import org.jitsi.jicofo.Participant;
 import org.jitsi.utils.logging2.Logger;
 import org.jitsi.utils.logging2.LoggerImpl;
 
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 public class SchismingHubImpl implements SchismingHub {
     @NotNull
     private final Logger logger;
-    private SchismingGroup schismingGroup;
+    private final List<SchismingGroup> schismingGroups;
 
     public SchismingHubImpl() {
         logger = new LoggerImpl(SchismingHubImpl.class.getName(), Level.INFO);
+        schismingGroups = new ArrayList<>();
     }
 
     @Override
-    public void register(Participant participant) {
+    public void register(Participant participant) throws ParticipantAlreadyRegisteredException {
         if(participant == null) {
-            return;
+            throw new InvalidParameterException("Participant cannot be null.");
         }
         logger.info("register participant: " + participant.toString());
-        schismingGroup = new SchismingGroup(participant);
+        if(getSchismingGroup(participant) != null) {
+            throw new ParticipantAlreadyRegisteredException(
+                    "Unable to register Participant " + participant.toString() + ". Already registered.");
+        }
+        schismingGroups.add(new SchismingGroup(participant));
     }
 
     @Override
     public SchismingGroup getSchismingGroup(Participant participant) {
-        return schismingGroup;
+        if(participant == null) {
+            return null;
+        }
+        for(SchismingGroup group : schismingGroups) {
+            if(group.getParticipants().contains(participant)) {
+                return group;
+            }
+        }
+        return null;
     }
 }

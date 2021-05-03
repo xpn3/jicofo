@@ -7,6 +7,7 @@ import mock.muc.MockMultiUserChatOpSet;
 import mock.util.TestConference;
 import org.jitsi.impl.protocol.xmpp.ChatMemberImpl;
 import org.jitsi.impl.protocol.xmpp.ChatRoomImpl;
+import org.jitsi.jicofo.schisming.ParticipantAlreadyRegisteredException;
 import org.jitsi.jicofo.schisming.SchismingHub;
 import org.jitsi.osgi.ServiceUtils2;
 import org.jitsi.protocol.xmpp.XmppChatMember;
@@ -52,7 +53,7 @@ public class JitsiMeetConferenceImplTest {
     }
 
     @Test
-    public void onMemberJoined_onSecondChatMember_registersBothParticipants() {
+    public void onMemberJoined_onSecondChatMember_registersBothParticipants() throws ParticipantAlreadyRegisteredException {
         SchismingHub hub = mock(SchismingHub.class);
         testConf.conference.setSchismingHub(hub);
 
