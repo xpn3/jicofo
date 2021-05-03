@@ -10,6 +10,7 @@ import java.util.logging.Level;
 public class SchismingHubImpl implements SchismingHub {
     @NotNull
     private final Logger logger;
+    private SchismingGroup schismingGroup;
 
     public SchismingHubImpl() {
         logger = new LoggerImpl(SchismingHubImpl.class.getName(), Level.INFO);
@@ -21,5 +22,11 @@ public class SchismingHubImpl implements SchismingHub {
             return;
         }
         logger.info("register participant: " + participant.toString());
+        schismingGroup = new SchismingGroup(participant);
+    }
+
+    @Override
+    public SchismingGroup getSchismingGroup(Participant participant) {
+        return schismingGroup;
     }
 }
