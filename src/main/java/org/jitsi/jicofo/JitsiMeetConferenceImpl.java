@@ -18,6 +18,7 @@
 package org.jitsi.jicofo;
 
 import org.jetbrains.annotations.*;
+import org.jitsi.impl.protocol.xmpp.XmppProtocolProvider;
 import org.jitsi.jicofo.bridge.*;
 import org.jitsi.jicofo.schisming.ParticipantAlreadyRegisteredException;
 import org.jitsi.jicofo.schisming.SchismingHub;
@@ -39,7 +40,11 @@ import org.jitsi.protocol.xmpp.colibri.*;
 import org.jitsi.protocol.xmpp.util.*;
 
 import org.jitsi.utils.logging.Logger;
+import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.*;
+import org.jivesoftware.smack.packet.id.StanzaIdUtil;
+import org.jivesoftware.smackx.muc.packet.MUCInitialPresence;
 import org.jxmpp.jid.*;
 import org.jxmpp.jid.impl.*;
 import org.jxmpp.jid.parts.*;
@@ -728,7 +733,16 @@ public class JitsiMeetConferenceImpl
 
             try {
                 schismingHub.register(participant);
-            } catch (ParticipantAlreadyRegisteredException e) {
+
+                XmppProtocolProvider xmppProtocolProvider = (XmppProtocolProvider) chatRoomMember.getChatRoom().getParentProvider();
+                XMPPConnection connection = xmppProtocolProvider.getConnection();
+                if (connection == null)
+                {
+                    logger.error("Failed to send presence extension - no connection");
+                    return;
+                }
+                schismingHub.sendState(connection);
+            } catch (ParticipantAlreadyRegisteredException | SmackException.NotConnectedException | InterruptedException e) {
                 e.printStackTrace();
             }
         }

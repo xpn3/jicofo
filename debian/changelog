@@ -1,3 +1,10 @@
+jicofo (1.0--1) unstable; urgency=medium
+
+  [ xpn3@ac100 ]
+  * Build from git. 555b519d
+
+ --  <xpn3@ac100>  Sat, 24 Apr 2021 14:31:18 +0200
+
 jicofo (1.0-0-g9fc93ed-1) unstable; urgency=low
 
   * Initial release.
