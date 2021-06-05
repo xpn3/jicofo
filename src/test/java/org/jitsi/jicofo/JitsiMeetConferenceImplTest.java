@@ -5,26 +5,18 @@ import mock.MockProtocolProvider;
 import mock.muc.MockMultiUserChat;
 import mock.muc.MockMultiUserChatOpSet;
 import mock.util.TestConference;
-import org.jitsi.impl.protocol.xmpp.ChatMemberImpl;
-import org.jitsi.impl.protocol.xmpp.ChatRoomImpl;
 import org.jitsi.jicofo.schisming.ParticipantAlreadyRegisteredException;
+import org.jitsi.jicofo.schisming.SchismingGroupLimitReachedException;
 import org.jitsi.jicofo.schisming.SchismingHub;
-import org.jitsi.osgi.ServiceUtils2;
-import org.jitsi.protocol.xmpp.XmppChatMember;
 import org.jitsi.xmpp.extensions.jitsimeet.SSRCInfoPacketExtension;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jxmpp.jid.EntityBareJid;
-import org.jxmpp.jid.EntityFullJid;
 import org.jxmpp.jid.impl.JidCreate;
-import org.jxmpp.jid.parts.Localpart;
-import org.jxmpp.jid.parts.Resourcepart;
 import org.mockito.ArgumentMatcher;
-import org.mockito.internal.verification.MockAwareVerificationMode;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.osgi.framework.BundleContext;
 
 import static org.mockito.Mockito.*;
 
@@ -53,7 +45,7 @@ public class JitsiMeetConferenceImplTest {
     }
 
     @Test
-    public void onMemberJoined_onSecondChatMember_registersBothParticipants() throws ParticipantAlreadyRegisteredException {
+    public void onMemberJoined_onSecondChatMember_registersBothParticipants() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
         SchismingHub hub = mock(SchismingHub.class);
         testConf.conference.setSchismingHub(hub);
 

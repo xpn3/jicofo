@@ -5,8 +5,11 @@ import org.jitsi.protocol.xmpp.XmppConnection;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPConnection;
 
+import java.util.List;
+
 public interface SchismingHub {
-    void register(Participant participant) throws ParticipantAlreadyRegisteredException;
+    void register(Participant participant) throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException;
+    List<SchismingGroup> getSchismingGroups();
     SchismingGroup getSchismingGroup(Participant participant);
     void sendState(XMPPConnection connection) throws SmackException.NotConnectedException, InterruptedException;
 }

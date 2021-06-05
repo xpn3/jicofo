@@ -19,14 +19,29 @@ public class SchismingHubImpl implements SchismingHub {
     @NotNull
     private final Logger logger;
     private final List<SchismingGroup> schismingGroups;
+    private Integer latestGroupId;
 
     public SchismingHubImpl() {
         logger = new LoggerImpl(SchismingHubImpl.class.getName(), Level.INFO);
         schismingGroups = new ArrayList<>();
+        latestGroupId = 0;
+    }
+
+    private Integer createGroupId() throws SchismingGroupLimitReachedException {
+        if(latestGroupId == Integer.MAX_VALUE) {
+            throw new SchismingGroupLimitReachedException(
+                    "Unable to create new SchismingGroup. Reached maximum number of SchismingGroups.");
+        }
+        return ++latestGroupId;
     }
 
     @Override
-    public void register(Participant participant) throws ParticipantAlreadyRegisteredException {
+    public List<SchismingGroup> getSchismingGroups() {
+        return new ArrayList<>(schismingGroups);
+    }
+
+    @Override
+    public void register(Participant participant) throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
         if(participant == null) {
             throw new InvalidParameterException("Participant cannot be null.");
         }
@@ -35,7 +50,7 @@ public class SchismingHubImpl implements SchismingHub {
             throw new ParticipantAlreadyRegisteredException(
                     "Unable to register Participant " + participant.toString() + ". Already registered.");
         }
-        schismingGroups.add(new SchismingGroup(participant));
+        schismingGroups.add(new SchismingGroup(createGroupId(), participant));
     }
 
     @Override
@@ -56,11 +71,15 @@ public class SchismingHubImpl implements SchismingHub {
         if(connection == null) {
             throw new InvalidParameterException("Connection cannot be null.");
         }
-        SchismingIq state = new SchismingIq();
-        state.setStanzaId(StanzaIdUtil.newStanzaId());
-        state.setType(IQ.Type.set);
-        // TODO add state to iq
-        logger.info("Sending SchismingHub state: " + state.toXML());
-        connection.sendStanza(state);
+        for(SchismingGroup group : schismingGroups) {
+            for(Participant participant : group.getParticipants()) {
+                SchismingIq state = new SchismingIq();
+                state.setTo(participant.getMucJid());
+                state.setType(IQ.Type.set);
+                state.setHub(this);
+                logger.info("Sending SchismingHub state: " + state.toXML().toString());
+                connection.sendStanza(state);
+            }
+        }
     }
 }

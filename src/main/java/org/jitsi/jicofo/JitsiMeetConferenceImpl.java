@@ -21,6 +21,7 @@ import org.jetbrains.annotations.*;
 import org.jitsi.impl.protocol.xmpp.XmppProtocolProvider;
 import org.jitsi.jicofo.bridge.*;
 import org.jitsi.jicofo.schisming.ParticipantAlreadyRegisteredException;
+import org.jitsi.jicofo.schisming.SchismingGroupLimitReachedException;
 import org.jitsi.jicofo.schisming.SchismingHub;
 import org.jitsi.jicofo.schisming.SchismingHubImpl;
 import org.jitsi.jicofo.version.*;
@@ -742,8 +743,8 @@ public class JitsiMeetConferenceImpl
                     return;
                 }
                 schismingHub.sendState(connection);
-            } catch (ParticipantAlreadyRegisteredException | SmackException.NotConnectedException | InterruptedException e) {
-                e.printStackTrace();
+            } catch (ParticipantAlreadyRegisteredException | SchismingGroupLimitReachedException | SmackException.NotConnectedException | InterruptedException e) {
+                logger.error(e.toString());
             }
         }
     }

@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jitsi.jicofo.JitsiMeetConference;
 import org.jitsi.jicofo.Participant;
 import org.jitsi.protocol.xmpp.XmppChatMember;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -12,8 +11,6 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -29,7 +26,7 @@ public class SchismingHubImplTest {
     }
 
     @Test
-    public void register() throws ParticipantAlreadyRegisteredException {
+    public void register() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
         Participant participant = createParticipant();
         //ACT
         sut.register(participant);
@@ -38,7 +35,7 @@ public class SchismingHubImplTest {
     }
 
     @Test
-    public void register_twoParticipants() throws ParticipantAlreadyRegisteredException {
+    public void register_twoParticipants() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
         Participant participant1 = createParticipant();
         Participant participant2 = createParticipant();
         //ACT
@@ -50,13 +47,13 @@ public class SchismingHubImplTest {
     }
 
     @Test(expected = InvalidParameterException.class)
-    public void register_participantIsNull_throws() throws ParticipantAlreadyRegisteredException {
+    public void register_participantIsNull_throws() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
         //ACT
         sut.register(null);
     }
 
     @Test
-    public void register_sameParticipantTwice_throws() throws ParticipantAlreadyRegisteredException {
+    public void register_sameParticipantTwice_throws() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
         Participant participant = createParticipant();
         sut.register(participant);
         //ACT
@@ -69,7 +66,7 @@ public class SchismingHubImplTest {
     }
 
     @NotNull
-    private Participant createParticipant() {
+    public static Participant createParticipant() {
         return new Participant(mock(JitsiMeetConference.class), mock(XmppChatMember.class), 10);
     }
 
