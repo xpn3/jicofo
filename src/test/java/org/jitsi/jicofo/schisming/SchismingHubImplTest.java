@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -73,7 +74,7 @@ public class SchismingHubImplTest {
     private void assertSchismingGroup(Participant participant) {
         SchismingGroup result = sut.getSchismingGroup(participant);
         assertNotNull(result);
-        List<Participant> participants = result.getParticipants();
+        Set<Participant> participants = result.getParticipants();
         assertTrue(participants.contains(participant));
     }
 }

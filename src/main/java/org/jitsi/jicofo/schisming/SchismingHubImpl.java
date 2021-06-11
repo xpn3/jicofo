@@ -2,13 +2,11 @@ package org.jitsi.jicofo.schisming;
 
 import org.jetbrains.annotations.NotNull;
 import org.jitsi.jicofo.Participant;
-import org.jitsi.protocol.xmpp.XmppConnection;
 import org.jitsi.utils.logging2.Logger;
 import org.jitsi.utils.logging2.LoggerImpl;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.IQ;
-import org.jivesoftware.smack.packet.id.StanzaIdUtil;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -50,7 +48,9 @@ public class SchismingHubImpl implements SchismingHub {
             throw new ParticipantAlreadyRegisteredException(
                     "Unable to register Participant " + participant.toString() + ". Already registered.");
         }
-        schismingGroups.add(new SchismingGroup(createGroupId(), participant));
+        SchismingGroup newGroup = new SchismingGroup(createGroupId());
+        newGroup.add(participant);
+        schismingGroups.add(newGroup);
     }
 
     @Override
