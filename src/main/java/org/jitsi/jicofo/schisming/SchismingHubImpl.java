@@ -43,14 +43,15 @@ public class SchismingHubImpl implements SchismingHub {
         if(participant == null) {
             throw new InvalidParameterException("Participant cannot be null.");
         }
-        logger.info("register participant: " + participant.toString());
         if(getSchismingGroup(participant) != null) {
             throw new ParticipantAlreadyRegisteredException(
                     "Unable to register Participant " + participant.toString() + ". Already registered.");
         }
+
         SchismingGroup newGroup = new SchismingGroup(createGroupId());
         newGroup.add(participant);
         schismingGroups.add(newGroup);
+        logger.info("Registered participant " + participant.toString() + " in group " + newGroup.getId());
     }
 
     @Override
@@ -61,12 +62,12 @@ public class SchismingHubImpl implements SchismingHub {
 
         SchismingGroup group = getSchismingGroup(participant);
         group.remove(participant);
+        logger.info("Deregistered participant " + participant.toString() + " from group " + group.getId());
 
         if(group.getNumberOfParticipants() == 0) {
             schismingGroups.remove(group);
             logger.info("Removed group " + group.getId() + " from SchismingHub");
         }
-        logger.info("Deregistered participant: " + participant.toString());
     }
 
     @Override

@@ -734,17 +734,18 @@ public class JitsiMeetConferenceImpl
 
             try {
                 schismingHub.register(participant);
-
                 XmppProtocolProvider xmppProtocolProvider = (XmppProtocolProvider) chatRoomMember.getChatRoom().getParentProvider();
                 XMPPConnection connection = xmppProtocolProvider.getConnection();
                 if (connection == null)
                 {
-                    logger.error("Failed to send presence extension - no connection");
+                    logger.error("Failed to send state of SchismingHub - no XMPPConnection");
                     return;
                 }
                 schismingHub.sendState(connection);
-            } catch (ParticipantAlreadyRegisteredException | SchismingGroupLimitReachedException | SmackException.NotConnectedException | InterruptedException e) {
-                logger.error(e.toString());
+            } catch (ParticipantAlreadyRegisteredException | SchismingGroupLimitReachedException e) {
+                logger.error("Failed to register participant - " + e.toString());
+            } catch (SmackException.NotConnectedException | InterruptedException e) {
+                logger.error("Failed to send state of SchismingHub - " + e.toString());
             }
         }
     }
@@ -1296,6 +1297,20 @@ public class JitsiMeetConferenceImpl
                     false /* no JVB update - will expire */);
 
                 participant.setJingleSession(null);
+            }
+
+            try {
+                schismingHub.deregister(participant);
+                XmppProtocolProvider xmppProtocolProvider = (XmppProtocolProvider) participant.getChatMember().getChatRoom().getParentProvider();
+                XMPPConnection connection = xmppProtocolProvider.getConnection();
+                if (connection == null)
+                {
+                    logger.error("Failed to send state of SchismingHub - no XMPPConnection");
+                    return;
+                }
+                schismingHub.sendState(connection);
+            } catch (SmackException.NotConnectedException | InterruptedException e) {
+                logger.error("Failed to send state of SchismingHub - " + e.toString());
             }
 
             boolean removed = participants.remove(participant);

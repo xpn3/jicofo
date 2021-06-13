@@ -65,6 +65,23 @@ public class JitsiMeetConferenceImplTest {
                 new Participant(testConf.conference, user2.getChatMember(), 10))));
     }
 
+    @Test
+    public void onMemberLeft_deregistersParticipant() {
+        SchismingHub hub = mock(SchismingHub.class);
+        testConf.conference.setSchismingHub(hub);
+
+        MockParticipant user1 = new MockParticipant("User1");
+        user1.setSsrcVideoType(SSRCInfoPacketExtension.CAMERA_VIDEO_TYPE);
+        user1.join(chat);
+
+        //ACT
+        user1.leave();
+
+        //ASSERT
+        verify(hub).deregister(argThat(new ParticipantMatcher(
+                new Participant(testConf.conference, user1.getChatMember(), 10))));
+    }
+
     public class ParticipantMatcher implements ArgumentMatcher<Participant> {
         private final Participant left;
 
