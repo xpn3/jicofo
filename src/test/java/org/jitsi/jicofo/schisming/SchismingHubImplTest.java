@@ -66,6 +66,42 @@ public class SchismingHubImplTest {
         assertTrue(exception.getMessage().contains("Unable to register Participant"));
     }
 
+    @Test
+    public void deregister() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+        Participant participant = createParticipant();
+        sut.register(participant);
+        assertSchismingGroup(participant);
+        //ACT
+        sut.deregister(participant);
+        //ASSERT
+        assertNoSchismingGroup(participant);
+    }
+
+    @Test
+    public void deregister_otherParticipantsInSchisminGroup_keepsSchismingGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+        Participant participantToDeregister = createParticipant();
+        sut.register(participantToDeregister);
+        SchismingGroup group = sut.getSchismingGroup(participantToDeregister);
+        Participant otherParticipant = createParticipant();
+        group.add(otherParticipant);
+        //ACT
+        sut.deregister(participantToDeregister);
+        //ASSERT
+        assertEquals(1, sut.getSchismingGroups().size());
+        assertSchismingGroup(otherParticipant);
+    }
+
+    @Test
+    public void deregister_noParticipantInSchisminGroup_removesSchismingGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+        Participant participant = createParticipant();
+        sut.register(participant);
+        assertSchismingGroup(participant);
+        //ACT
+        sut.deregister(participant);
+        //ASSERT
+        assertEquals(0, sut.getSchismingGroups().size());
+    }
+
     @NotNull
     public static Participant createParticipant() {
         return new Participant(mock(JitsiMeetConference.class), mock(XmppChatMember.class), 10);
@@ -76,5 +112,10 @@ public class SchismingHubImplTest {
         assertNotNull(result);
         Set<Participant> participants = result.getParticipants();
         assertTrue(participants.contains(participant));
+    }
+
+    private void assertNoSchismingGroup(Participant participant) {
+        SchismingGroup result = sut.getSchismingGroup(participant);
+        assertNull(result);
     }
 }

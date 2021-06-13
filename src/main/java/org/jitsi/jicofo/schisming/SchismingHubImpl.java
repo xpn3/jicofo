@@ -54,6 +54,22 @@ public class SchismingHubImpl implements SchismingHub {
     }
 
     @Override
+    public void deregister(Participant participant) throws InvalidParameterException {
+        if(participant == null) {
+            throw new InvalidParameterException("Participant cannot be null.");
+        }
+
+        SchismingGroup group = getSchismingGroup(participant);
+        group.remove(participant);
+
+        if(group.getNumberOfParticipants() == 0) {
+            schismingGroups.remove(group);
+            logger.info("Removed group " + group.getId() + " from SchismingHub");
+        }
+        logger.info("Deregistered participant: " + participant.toString());
+    }
+
+    @Override
     public SchismingGroup getSchismingGroup(Participant participant) {
         if(participant == null) {
             return null;

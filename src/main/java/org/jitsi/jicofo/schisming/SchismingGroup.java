@@ -20,11 +20,22 @@ public class SchismingGroup {
         participants.add(participant);
     }
 
+    public void remove(Participant participant) {
+        if(participant == null) {
+            return;
+        }
+        participants.remove(participant);
+    }
+
     public Integer getId() {
         return id;
     }
 
     public Set<Participant> getParticipants() {
         return new HashSet<>(participants);
+    }
+
+    public Integer getNumberOfParticipants() {
+        return participants.size();
     }
 }
