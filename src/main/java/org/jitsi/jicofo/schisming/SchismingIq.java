@@ -27,7 +27,7 @@ public class SchismingIq extends IQ {
                 xml.rightAngleBracket();
                 for(Participant participant : group.getParticipants()) {
                     xml.halfOpenElement("participant");
-                    xml.attribute("id", participant.getMucJid().toString());
+                    xml.attribute("id", participant.getEndpointId());
                     xml.rightAngleBracket();
                     xml.closeElement("participant");
                 }
