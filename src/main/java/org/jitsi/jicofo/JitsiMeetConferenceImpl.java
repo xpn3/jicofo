@@ -23,7 +23,6 @@ import org.jitsi.jicofo.bridge.*;
 import org.jitsi.jicofo.schisming.ParticipantAlreadyRegisteredException;
 import org.jitsi.jicofo.schisming.SchismingGroupLimitReachedException;
 import org.jitsi.jicofo.schisming.SchismingHub;
-import org.jitsi.jicofo.schisming.SchismingHubImpl;
 import org.jitsi.jicofo.version.*;
 import org.jitsi.osgi.*;
 import org.jitsi.utils.*;
@@ -44,8 +43,6 @@ import org.jitsi.utils.logging.Logger;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.*;
-import org.jivesoftware.smack.packet.id.StanzaIdUtil;
-import org.jivesoftware.smackx.muc.packet.MUCInitialPresence;
 import org.jxmpp.jid.*;
 import org.jxmpp.jid.impl.*;
 import org.jxmpp.jid.parts.*;
@@ -734,14 +731,6 @@ public class JitsiMeetConferenceImpl
 
             try {
                 schismingHub.register(participant);
-                XmppProtocolProvider xmppProtocolProvider = (XmppProtocolProvider) chatRoomMember.getChatRoom().getParentProvider();
-                XMPPConnection connection = xmppProtocolProvider.getConnection();
-                if (connection == null)
-                {
-                    logger.error("Failed to send state of SchismingHub - no XMPPConnection");
-                    return;
-                }
-                schismingHub.sendState(connection);
             } catch (ParticipantAlreadyRegisteredException | SchismingGroupLimitReachedException e) {
                 logger.error("Failed to register participant - " + e.toString());
             } catch (SmackException.NotConnectedException | InterruptedException e) {
@@ -1301,14 +1290,6 @@ public class JitsiMeetConferenceImpl
 
             try {
                 schismingHub.deregister(participant);
-                XmppProtocolProvider xmppProtocolProvider = (XmppProtocolProvider) participant.getChatMember().getChatRoom().getParentProvider();
-                XMPPConnection connection = xmppProtocolProvider.getConnection();
-                if (connection == null)
-                {
-                    logger.error("Failed to send state of SchismingHub - no XMPPConnection");
-                    return;
-                }
-                schismingHub.sendState(connection);
             } catch (SmackException.NotConnectedException | InterruptedException e) {
                 logger.error("Failed to send state of SchismingHub - " + e.toString());
             }

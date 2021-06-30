@@ -9,10 +9,9 @@ import java.security.InvalidParameterException;
 import java.util.List;
 
 public interface SchismingHub {
-    void register(Participant participant) throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException;
-    void deregister(Participant participant) throws InvalidParameterException;
+    void register(Participant participant) throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException;
+    void deregister(Participant participant) throws InvalidParameterException, SmackException.NotConnectedException, InterruptedException;
     List<SchismingGroup> getSchismingGroups();
     SchismingGroup getSchismingGroup(Participant participant);
-    void sendState(XMPPConnection connection) throws SmackException.NotConnectedException, InterruptedException;
-    void joinGroup(Participant participant, Integer groupId) throws SchismingGroupLimitReachedException, InvalidParameterException;
+    void joinGroup(Participant participant, Integer groupId) throws SchismingGroupLimitReachedException, InvalidParameterException, SmackException.NotConnectedException, InterruptedException;
 }

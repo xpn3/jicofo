@@ -1,6 +1,7 @@
 package org.jitsi.jicofo.schisming;
 
 import org.jetbrains.annotations.NotNull;
+import org.jitsi.impl.protocol.xmpp.XmppProtocolProvider;
 import org.jitsi.jicofo.Participant;
 import org.jitsi.utils.logging2.Logger;
 import org.jitsi.utils.logging2.LoggerImpl;
@@ -39,7 +40,7 @@ public class SchismingHubImpl implements SchismingHub {
     }
 
     @Override
-    public void register(Participant participant) throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void register(Participant participant) throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         if(participant == null) {
             throw new InvalidParameterException("Participant cannot be null.");
         }
@@ -47,11 +48,14 @@ public class SchismingHubImpl implements SchismingHub {
             throw new ParticipantAlreadyRegisteredException(
                     "Unable to register Participant " + participant.toString() + ". Already registered.");
         }
+
         addParticipantToNewGroup(participant);
+
+        sendState(participant);
     }
 
     @Override
-    public void deregister(Participant participant) throws InvalidParameterException {
+    public void deregister(Participant participant) throws InvalidParameterException, SmackException.NotConnectedException, InterruptedException {
         if(participant == null) {
             throw new InvalidParameterException("Participant cannot be null.");
         }
@@ -59,6 +63,8 @@ public class SchismingHubImpl implements SchismingHub {
         SchismingGroup group = getSchismingGroup(participant);
         logger.info("Deregistered participant " + participant.toString() + " from group " + group.getId());
         removeParticipantFromGroup(participant, group);
+
+        sendState(participant);
     }
 
     @Override
@@ -75,24 +81,7 @@ public class SchismingHubImpl implements SchismingHub {
     }
 
     @Override
-    public void sendState(XMPPConnection connection) throws SmackException.NotConnectedException, InterruptedException {
-        if(connection == null) {
-            throw new InvalidParameterException("Connection cannot be null.");
-        }
-        for(SchismingGroup group : schismingGroups) {
-            for(Participant participant : group.getParticipants()) {
-                SchismingIq state = new SchismingIq();
-                state.setTo(participant.getMucJid());
-                state.setType(IQ.Type.set);
-                state.setHub(this);
-                logger.info("Sending SchismingHub state: " + state.toXML().toString());
-                connection.sendStanza(state);
-            }
-        }
-    }
-
-    @Override
-    public void joinGroup(Participant participant, Integer groupId) throws SchismingGroupLimitReachedException, InvalidParameterException {
+    public void joinGroup(Participant participant, Integer groupId) throws SchismingGroupLimitReachedException, InvalidParameterException, SmackException.NotConnectedException, InterruptedException {
         if(participant == null) {
             throw new InvalidParameterException("Participant may not be null.");
         }
@@ -114,6 +103,8 @@ public class SchismingHubImpl implements SchismingHub {
             groupToJoin.add(participant);
         }
         removeParticipantFromGroup(participant, currentGroup);
+
+        sendState(participant);
     }
 
     private void addParticipantToNewGroup(Participant participant) throws SchismingGroupLimitReachedException {
@@ -128,6 +119,32 @@ public class SchismingHubImpl implements SchismingHub {
         if(group.getNumberOfParticipants() == 0) {
             schismingGroups.remove(group);
             logger.info("Removed group " + group.getId() + " from SchismingHub");
+        }
+    }
+
+    private void sendState(Participant participant) throws SmackException.NotConnectedException, InterruptedException {
+        XmppProtocolProvider xmppProtocolProvider = (XmppProtocolProvider) participant.getChatMember().getChatRoom().getParentProvider();
+        XMPPConnection connection = xmppProtocolProvider.getConnection();
+        if (connection == null) {
+            logger.error("Failed to send state of SchismingHub - no XMPPConnection");
+            return;
+        }
+        sendStanza(connection);
+    }
+
+    private void sendStanza(XMPPConnection connection) throws SmackException.NotConnectedException, InterruptedException {
+        if(connection == null) {
+            throw new InvalidParameterException("Connection cannot be null.");
+        }
+        for(SchismingGroup group : schismingGroups) {
+            for(Participant participant : group.getParticipants()) {
+                SchismingIq state = new SchismingIq();
+                state.setTo(participant.getMucJid());
+                state.setType(IQ.Type.set);
+                state.setHub(this);
+                logger.info("Sending SchismingHub state: " + state.toXML().toString());
+                connection.sendStanza(state);
+            }
         }
     }
 }

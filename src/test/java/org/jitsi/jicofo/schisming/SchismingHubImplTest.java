@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jitsi.jicofo.JitsiMeetConference;
 import org.jitsi.jicofo.Participant;
 import org.jitsi.protocol.xmpp.XmppChatMember;
+import org.jivesoftware.smack.SmackException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -27,7 +28,7 @@ public class SchismingHubImplTest {
     }
 
     @Test
-    public void register() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void register() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         Participant participant = createParticipant();
         //ACT
         sut.register(participant);
@@ -36,7 +37,7 @@ public class SchismingHubImplTest {
     }
 
     @Test
-    public void register_twoParticipants() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void register_twoParticipants() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         Participant participant1 = createParticipant();
         Participant participant2 = createParticipant();
         //ACT
@@ -48,13 +49,13 @@ public class SchismingHubImplTest {
     }
 
     @Test(expected = InvalidParameterException.class)
-    public void register_participantIsNull_throws() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void register_participantIsNull_throws() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         //ACT
         sut.register(null);
     }
 
     @Test
-    public void register_sameParticipantTwice_throws() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void register_sameParticipantTwice_throws() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         Participant participant = createParticipant();
         sut.register(participant);
         //ACT
@@ -67,7 +68,7 @@ public class SchismingHubImplTest {
     }
 
     @Test
-    public void deregister() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void deregister() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         Participant participant = createParticipant();
         sut.register(participant);
         assertSchismingGroup(participant);
@@ -78,7 +79,7 @@ public class SchismingHubImplTest {
     }
 
     @Test
-    public void deregister_otherParticipantsInSchisminGroup_keepsSchismingGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void deregister_otherParticipantsInSchisminGroup_keepsSchismingGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         Participant participantToDeregister = createParticipant();
         sut.register(participantToDeregister);
         SchismingGroup group = sut.getSchismingGroup(participantToDeregister);
@@ -92,7 +93,7 @@ public class SchismingHubImplTest {
     }
 
     @Test
-    public void deregister_noParticipantInSchisminGroup_removesSchismingGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void deregister_noParticipantInSchisminGroup_removesSchismingGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         Participant participant = createParticipant();
         sut.register(participant);
         assertSchismingGroup(participant);
@@ -103,7 +104,7 @@ public class SchismingHubImplTest {
     }
 
     @Test
-    public void joinGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void joinGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         Participant participant1 = createParticipant();
         Participant participant2 = createParticipant();
         sut.register(participant1);
@@ -116,13 +117,13 @@ public class SchismingHubImplTest {
     }
 
     @Test(expected = InvalidParameterException.class)
-    public void joinGroup_participantNull_throws() throws SchismingGroupLimitReachedException {
+    public void joinGroup_participantNull_throws() throws SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         //ACT
         sut.joinGroup(null, null);
     }
 
     @Test
-    public void joinGroup_sameGroup_succeeds() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void joinGroup_sameGroup_succeeds() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         Participant participant1 = createParticipant();
         sut.register(participant1);
         SchismingGroup groupToJoin = sut.getSchismingGroup(participant1);
@@ -133,7 +134,7 @@ public class SchismingHubImplTest {
     }
 
     @Test
-    public void joinGroup_groupIdNull_joinsNewGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void joinGroup_groupIdNull_joinsNewGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         Participant participant1 = createParticipant();
         sut.register(participant1);
         SchismingGroup currentGroup = sut.getSchismingGroup(participant1);
@@ -145,7 +146,7 @@ public class SchismingHubImplTest {
     }
 
     @Test
-    public void joinGroup_groupIdNonExistent_joinsNewGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void joinGroup_groupIdNonExistent_joinsNewGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         Participant participant1 = createParticipant();
         sut.register(participant1);
         SchismingGroup currentGroup = sut.getSchismingGroup(participant1);
