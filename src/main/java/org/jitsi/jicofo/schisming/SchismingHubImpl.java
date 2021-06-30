@@ -47,11 +47,7 @@ public class SchismingHubImpl implements SchismingHub {
             throw new ParticipantAlreadyRegisteredException(
                     "Unable to register Participant " + participant.toString() + ". Already registered.");
         }
-
-        SchismingGroup newGroup = new SchismingGroup(createGroupId());
-        newGroup.add(participant);
-        schismingGroups.add(newGroup);
-        logger.info("Registered participant " + participant.toString() + " in group " + newGroup.getId());
+        addParticipantToNewGroup(participant);
     }
 
     @Override
@@ -61,13 +57,8 @@ public class SchismingHubImpl implements SchismingHub {
         }
 
         SchismingGroup group = getSchismingGroup(participant);
-        group.remove(participant);
         logger.info("Deregistered participant " + participant.toString() + " from group " + group.getId());
-
-        if(group.getNumberOfParticipants() == 0) {
-            schismingGroups.remove(group);
-            logger.info("Removed group " + group.getId() + " from SchismingHub");
-        }
+        removeParticipantFromGroup(participant, group);
     }
 
     @Override
@@ -97,6 +88,46 @@ public class SchismingHubImpl implements SchismingHub {
                 logger.info("Sending SchismingHub state: " + state.toXML().toString());
                 connection.sendStanza(state);
             }
+        }
+    }
+
+    @Override
+    public void joinGroup(Participant participant, Integer groupId) throws SchismingGroupLimitReachedException, InvalidParameterException {
+        if(participant == null) {
+            throw new InvalidParameterException("Participant may not be null.");
+        }
+        SchismingGroup groupToJoin = null;
+        for(SchismingGroup group : schismingGroups) {
+            if(group.getId().equals(groupId)) {
+                groupToJoin = group;
+            }
+        }
+
+        SchismingGroup currentGroup = getSchismingGroup(participant);
+        if(currentGroup.getId().equals(groupId)) {
+            return;
+        }
+
+        if(groupToJoin == null) {
+            addParticipantToNewGroup(participant);
+        } else {
+            groupToJoin.add(participant);
+        }
+        removeParticipantFromGroup(participant, currentGroup);
+    }
+
+    private void addParticipantToNewGroup(Participant participant) throws SchismingGroupLimitReachedException {
+        SchismingGroup newGroup = new SchismingGroup(createGroupId());
+        newGroup.add(participant);
+        schismingGroups.add(newGroup);
+        logger.info("Registered participant " + participant.toString() + " in group " + newGroup.getId());
+    }
+
+    private void removeParticipantFromGroup(Participant participant, SchismingGroup group) {
+        group.remove(participant);
+        if(group.getNumberOfParticipants() == 0) {
+            schismingGroups.remove(group);
+            logger.info("Removed group " + group.getId() + " from SchismingHub");
         }
     }
 }

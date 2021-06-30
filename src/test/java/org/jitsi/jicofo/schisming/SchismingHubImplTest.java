@@ -102,6 +102,60 @@ public class SchismingHubImplTest {
         assertEquals(0, sut.getSchismingGroups().size());
     }
 
+    @Test
+    public void joinGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+        Participant participant1 = createParticipant();
+        Participant participant2 = createParticipant();
+        sut.register(participant1);
+        sut.register(participant2);
+        SchismingGroup groupToJoin = sut.getSchismingGroup(participant2);
+        //ACT
+        sut.joinGroup(participant1, groupToJoin.getId());
+        //ASSERT
+        assertEquals(groupToJoin, sut.getSchismingGroup(participant1));
+    }
+
+    @Test(expected = InvalidParameterException.class)
+    public void joinGroup_participantNull_throws() throws SchismingGroupLimitReachedException {
+        //ACT
+        sut.joinGroup(null, null);
+    }
+
+    @Test
+    public void joinGroup_sameGroup_succeeds() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+        Participant participant1 = createParticipant();
+        sut.register(participant1);
+        SchismingGroup groupToJoin = sut.getSchismingGroup(participant1);
+        //ACT
+        sut.joinGroup(participant1, groupToJoin.getId());
+        //ASSERT
+        assertEquals(groupToJoin, sut.getSchismingGroup(participant1));
+    }
+
+    @Test
+    public void joinGroup_groupIdNull_joinsNewGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+        Participant participant1 = createParticipant();
+        sut.register(participant1);
+        SchismingGroup currentGroup = sut.getSchismingGroup(participant1);
+        //ACT
+        sut.joinGroup(participant1, null);
+        //ASSERT
+        assertNotEquals(currentGroup, sut.getSchismingGroup(participant1));
+        assertFalse(sut.getSchismingGroups().contains(currentGroup));
+    }
+
+    @Test
+    public void joinGroup_groupIdNonExistent_joinsNewGroup() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+        Participant participant1 = createParticipant();
+        sut.register(participant1);
+        SchismingGroup currentGroup = sut.getSchismingGroup(participant1);
+        //ACT
+        sut.joinGroup(participant1, 123);
+        //ASSERT
+        assertNotEquals(currentGroup, sut.getSchismingGroup(participant1));
+        assertFalse(sut.getSchismingGroups().contains(currentGroup));
+    }
+
     @NotNull
     public static Participant createParticipant() {
         return new Participant(mock(JitsiMeetConference.class), mock(XmppChatMember.class), 10);

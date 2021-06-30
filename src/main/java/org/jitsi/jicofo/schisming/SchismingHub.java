@@ -14,4 +14,5 @@ public interface SchismingHub {
     List<SchismingGroup> getSchismingGroups();
     SchismingGroup getSchismingGroup(Participant participant);
     void sendState(XMPPConnection connection) throws SmackException.NotConnectedException, InterruptedException;
+    void joinGroup(Participant participant, Integer groupId) throws SchismingGroupLimitReachedException, InvalidParameterException;
 }
