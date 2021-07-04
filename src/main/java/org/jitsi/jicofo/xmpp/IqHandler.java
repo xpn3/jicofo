@@ -20,6 +20,7 @@ package org.jitsi.jicofo.xmpp;
 import org.jetbrains.annotations.*;
 import org.jitsi.jicofo.*;
 import org.jitsi.jicofo.bridge.Bridge;
+import org.jitsi.jicofo.schisming.*;
 import org.jitsi.xmpp.extensions.rayo.*;
 import net.java.sip.communicator.service.protocol.*;
 
@@ -27,6 +28,7 @@ import org.jitsi.xmpp.extensions.jitsimeet.*;
 import org.jitsi.jicofo.jigasi.*;
 import org.jitsi.protocol.xmpp.*;
 import org.jitsi.utils.logging.*;
+import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.iqrequest.*;
 import org.jivesoftware.smack.packet.*;
 import org.jivesoftware.smack.packet.id.*;
@@ -63,6 +65,8 @@ public class IqHandler
     private final ConferenceIqHandler conferenceIqHandler;
     private final AuthenticationIqHandler authenticationIqHandler;
 
+    private final SchismingJoinIqHandler schismingJoinIqHandler = new SchismingJoinIqHandler();
+
     /**
      * @param focusManager The <tt>FocusManager</tt> to use to access active conferences.
      */
@@ -78,6 +82,7 @@ public class IqHandler
         MuteIqProvider.registerMuteIqProvider();
         new RayoIqProvider().registerRayoIQs();
         StartMutedProvider.registerStartMutedProvider();
+        SchismingJoinIqProvider.registerSchismingJoinIqProvider();
     }
 
     /**
@@ -96,6 +101,7 @@ public class IqHandler
             connection.registerIQRequestHandler(authenticationIqHandler.getLoginUrlIqHandler());
             connection.registerIQRequestHandler(authenticationIqHandler.getLogoutIqHandler());
         }
+        connection.registerIQRequestHandler(schismingJoinIqHandler);
     }
 
     private class MuteIqHandler extends AbstractIqRequestHandler
@@ -136,6 +142,25 @@ public class IqHandler
         }
     }
 
+    private class SchismingJoinIqHandler extends AbstractIqRequestHandler
+    {
+        SchismingJoinIqHandler()
+        {
+            super(
+                SchismingJoinIq.ELEMENT_NAME,
+                SchismingJoinIq.NAMESPACE,
+                IQ.Type.set,
+                Mode.sync);
+        }
+
+        @Override
+        public IQ handleIQRequest(IQ iqRequest)
+        {
+            logger.info("Handling SchismingJoinIq " + iqRequest.toString());
+            return handleSchismingJoinIq((SchismingJoinIq) iqRequest);
+        }
+    }
+
     /**
      * Disposes this instance and stop listening for extensions packets.
      */
@@ -145,6 +170,7 @@ public class IqHandler
         {
             connection.unregisterIQRequestHandler(muteIqHandler);
             connection.unregisterIQRequestHandler(dialIqHandler);
+            connection.unregisterIQRequestHandler(schismingJoinIqHandler);
             connection = null;
         }
     }
@@ -157,6 +183,37 @@ public class IqHandler
             return null;
         }
         return focusManager.getConference(roomName);
+    }
+
+    private IQ handleSchismingJoinIq(SchismingJoinIq schismingJoinIq)
+    {
+        String participantId = schismingJoinIq.getParticipantId();
+
+        if(participantId == null) {
+            logger.debug("Participant may not be null.");
+            return IQ.createErrorResponse(schismingJoinIq, XMPPError.getBuilder(XMPPError.Condition.bad_request));
+        }
+
+        Jid from = schismingJoinIq.getFrom();
+        JitsiMeetConferenceImpl conference = getConferenceForMucJid(from);
+
+        if(conference == null) {
+            logger.debug("Room not found for JID: " + from);
+            return IQ.createErrorResponse(schismingJoinIq, XMPPError.getBuilder(XMPPError.Condition.item_not_found));
+        }
+
+        Participant participant = conference.findParticipantForId(participantId);
+        Integer groupId = schismingJoinIq.getGroupId();
+        SchismingHub hub = conference.getSchismingHub();
+
+        try {
+            hub.joinGroup(participant, groupId);
+        } catch (SchismingGroupLimitReachedException | SmackException.NotConnectedException | InterruptedException e) {
+            logger.warn("Failed to join/leave SchismingGroup due to: " + e.getMessage());
+            return IQ.createErrorResponse(schismingJoinIq, XMPPError.getBuilder(XMPPError.Condition.internal_server_error));
+        }
+
+        return IQ.createResultIQ(schismingJoinIq);
     }
 
     private IQ handleMuteIq(MuteIq muteIq)

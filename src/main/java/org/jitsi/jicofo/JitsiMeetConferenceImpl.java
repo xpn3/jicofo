@@ -337,6 +337,10 @@ public class JitsiMeetConferenceImpl
         this.schismingHub = schismingHub;
     }
 
+    public SchismingHub getSchismingHub() {
+        return this.schismingHub;
+    }
+
     /**
      * Starts conference focus processing, bind listeners and so on...
      *
@@ -1389,6 +1393,19 @@ public class JitsiMeetConferenceImpl
                 return participant;
             }
         }
+        return null;
+    }
+
+    public Participant findParticipantForId(String participantId)
+    {
+        for (Participant participant : participants)
+        {
+            if (participant.getEndpointId().equals(participantId))
+            {
+                return participant;
+            }
+        }
+        logger.info("Unable to find participant for Id " + participantId);
         return null;
     }
 
