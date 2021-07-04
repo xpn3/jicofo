@@ -138,7 +138,7 @@ public class SchismingHubImpl implements SchismingHub {
         }
         for(SchismingGroup group : schismingGroups) {
             for(Participant participant : group.getParticipants()) {
-                SchismingIq state = new SchismingIq();
+                SchismingStateIq state = new SchismingStateIq();
                 state.setTo(participant.getMucJid());
                 state.setType(IQ.Type.set);
                 state.setHub(this);

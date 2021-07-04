@@ -2,6 +2,7 @@ package org.jitsi.jicofo.schisming;
 
 import org.custommonkey.xmlunit.Diff;
 import org.jitsi.jicofo.Participant;
+import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.id.StanzaIdUtil;
 import org.junit.Before;
@@ -14,16 +15,16 @@ import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SchismingIqTest {
-    private SchismingIq sut;
+public class SchismingStateIqTest {
+    private SchismingStateIq sut;
 
     @Before
     public void setup() {
-        sut = new SchismingIq();
+        sut = new SchismingStateIq();
     }
 
     @Test
-    public void toXml() throws ParticipantAlreadyRegisteredException, IOException, SAXException, SchismingGroupLimitReachedException {
+    public void toXml() throws ParticipantAlreadyRegisteredException, IOException, SAXException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         sut.setStanzaId(StanzaIdUtil.newStanzaId());
         sut.setType(IQ.Type.set);
         Participant participant1 = SchismingHubImplTest.createParticipant();

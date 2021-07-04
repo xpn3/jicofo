@@ -3,15 +3,15 @@ import org.jitsi.jicofo.Participant;
 import org.jitsi.utils.logging.Logger;
 import org.jivesoftware.smack.packet.*;
 
-public class SchismingIq extends IQ {
-    private final static Logger logger = Logger.getLogger(SchismingIq.class);
+public class SchismingStateIq extends IQ {
+    private final static Logger logger = Logger.getLogger(SchismingStateIq.class);
 
     public static final String ELEMENT_NAME = "schisminghub";
     public static final String NAMESPACE = "http://jitsi.org/jitmeet/schisming";
 
     public SchismingHub hub;
 
-    public SchismingIq()
+    public SchismingStateIq()
     {
         super(ELEMENT_NAME, NAMESPACE);
     }
