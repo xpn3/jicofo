@@ -24,6 +24,7 @@ import mock.muc.*;
 
 import mock.xmpp.*;
 import org.jitsi.jicofo.*;
+import org.jitsi.jicofo.schisming.SchismingHub;
 import org.jitsi.osgi.*;
 
 import org.jxmpp.jid.*;
@@ -31,6 +32,8 @@ import org.jxmpp.jid.impl.*;
 import org.osgi.framework.*;
 
 import java.util.*;
+
+import static org.mockito.Mockito.*;
 
 /**
  *
@@ -116,6 +119,7 @@ public class TestConference
         focusManagerRef.get().conferenceRequest(roomName, properties);
 
         this.conference = focusManagerRef.get().getConference(roomName);
+        this.conference.setSchismingHub(mock(SchismingHub.class));
 
         MockMultiUserChatOpSet mucOpSet
             = getFocusProtocolProvider().getMockChatOpSet();

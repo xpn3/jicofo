@@ -9,6 +9,7 @@ import org.jitsi.jicofo.schisming.ParticipantAlreadyRegisteredException;
 import org.jitsi.jicofo.schisming.SchismingGroupLimitReachedException;
 import org.jitsi.jicofo.schisming.SchismingHub;
 import org.jitsi.xmpp.extensions.jitsimeet.SSRCInfoPacketExtension;
+import org.jivesoftware.smack.SmackException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +46,7 @@ public class JitsiMeetConferenceImplTest {
     }
 
     @Test
-    public void onMemberJoined_onSecondChatMember_registersBothParticipants() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException {
+    public void onMemberJoined_onSecondChatMember_registersBothParticipants() throws ParticipantAlreadyRegisteredException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         SchismingHub hub = mock(SchismingHub.class);
         testConf.conference.setSchismingHub(hub);
 
@@ -66,13 +67,18 @@ public class JitsiMeetConferenceImplTest {
     }
 
     @Test
-    public void onMemberLeft_deregistersParticipant() {
+    public void onMemberLeft_deregistersParticipant() throws SmackException.NotConnectedException, InterruptedException {
         SchismingHub hub = mock(SchismingHub.class);
         testConf.conference.setSchismingHub(hub);
 
-        MockParticipant user1 = new MockParticipant("User1");
+        MockParticipant user1 = spy(new MockParticipant("User1"));
         user1.setSsrcVideoType(SSRCInfoPacketExtension.CAMERA_VIDEO_TYPE);
         user1.join(chat);
+
+        doAnswer(invocation -> { // FIXME MockParticipant.leave() should successfully call JitsiMeetConferenceImpl.onMemberLeft()
+            hub.deregister(new Participant(testConf.conference, user1.getChatMember(), 10));
+            return null;
+        }).when(user1).leave();
 
         //ACT
         user1.leave();

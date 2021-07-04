@@ -1,8 +1,10 @@
 package org.jitsi.jicofo.schisming;
 
+import net.java.sip.communicator.service.protocol.ChatRoom;
 import org.jetbrains.annotations.NotNull;
 import org.jitsi.impl.protocol.xmpp.XmppProtocolProvider;
 import org.jitsi.jicofo.Participant;
+import org.jitsi.protocol.xmpp.XmppChatMember;
 import org.jitsi.utils.logging2.Logger;
 import org.jitsi.utils.logging2.LoggerImpl;
 import org.jivesoftware.smack.SmackException;
@@ -122,13 +124,17 @@ public class SchismingHubImpl implements SchismingHub {
         }
     }
 
-    private void sendState(Participant participant) throws SmackException.NotConnectedException, InterruptedException {
-        XmppProtocolProvider xmppProtocolProvider = (XmppProtocolProvider) participant.getChatMember().getChatRoom().getParentProvider();
+    public void sendState(Participant participant) throws SmackException.NotConnectedException, InterruptedException {
+        XmppChatMember chatMember = participant.getChatMember();
+        ChatRoom chatRoom = chatMember.getChatRoom();
+        XmppProtocolProvider xmppProtocolProvider = (XmppProtocolProvider) chatRoom.getParentProvider();
         XMPPConnection connection = xmppProtocolProvider.getConnection();
+
         if (connection == null) {
             logger.error("Failed to send state of SchismingHub - no XMPPConnection");
             return;
         }
+
         sendStanza(connection);
     }
 

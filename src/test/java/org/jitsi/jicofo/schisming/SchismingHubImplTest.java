@@ -1,5 +1,7 @@
 package org.jitsi.jicofo.schisming;
 
+import net.java.sip.communicator.service.protocol.ChatRoom;
+import net.java.sip.communicator.service.protocol.ProtocolProviderService;
 import org.jetbrains.annotations.NotNull;
 import org.jitsi.jicofo.JitsiMeetConference;
 import org.jitsi.jicofo.Participant;
@@ -16,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SchismingHubImplTest {
@@ -24,7 +26,7 @@ public class SchismingHubImplTest {
 
     @Before
     public void setup() {
-        sut = new SchismingHubImpl();
+        sut = spy(SchismingHubImpl.class);
     }
 
     @Test
@@ -158,8 +160,16 @@ public class SchismingHubImplTest {
     }
 
     @NotNull
-    public static Participant createParticipant() {
-        return new Participant(mock(JitsiMeetConference.class), mock(XmppChatMember.class), 10);
+    private Participant createParticipant() {
+        Participant participant = new Participant(mock(JitsiMeetConference.class), mock(XmppChatMember.class), 10);
+
+        try {
+            doNothing().when(sut).sendState(participant);
+        } catch (SmackException.NotConnectedException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return participant;
     }
 
     private void assertSchismingGroup(Participant participant) {

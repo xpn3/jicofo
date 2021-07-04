@@ -14,4 +14,5 @@ public interface SchismingHub {
     List<SchismingGroup> getSchismingGroups();
     SchismingGroup getSchismingGroup(Participant participant);
     void joinGroup(Participant participant, Integer groupId) throws SchismingGroupLimitReachedException, InvalidParameterException, SmackException.NotConnectedException, InterruptedException;
+    public void sendState(Participant participant) throws SmackException.NotConnectedException, InterruptedException;
 }

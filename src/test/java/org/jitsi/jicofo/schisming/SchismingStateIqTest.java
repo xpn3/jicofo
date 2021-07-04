@@ -1,7 +1,10 @@
 package org.jitsi.jicofo.schisming;
 
 import org.custommonkey.xmlunit.Diff;
+import org.jetbrains.annotations.NotNull;
+import org.jitsi.jicofo.JitsiMeetConference;
 import org.jitsi.jicofo.Participant;
+import org.jitsi.protocol.xmpp.XmppChatMember;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.id.StanzaIdUtil;
@@ -12,7 +15,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.xml.sax.SAXException;
 import java.io.IOException;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SchismingStateIqTest {
@@ -27,13 +30,13 @@ public class SchismingStateIqTest {
     public void toXml() throws ParticipantAlreadyRegisteredException, IOException, SAXException, SchismingGroupLimitReachedException, SmackException.NotConnectedException, InterruptedException {
         sut.setStanzaId(StanzaIdUtil.newStanzaId());
         sut.setType(IQ.Type.set);
-        Participant participant1 = SchismingHubImplTest.createParticipant();
-        Participant participant2 = SchismingHubImplTest.createParticipant();
-        Participant participant3 = SchismingHubImplTest.createParticipant();
+        SchismingHub hub = spy(SchismingHubImpl.class);
+        Participant participant1 = createParticipant(hub);
+        Participant participant2 = createParticipant(hub);
+        Participant participant3 = createParticipant(hub);
         when(participant1.getEndpointId()).thenReturn("participant1");
         when(participant2.getEndpointId()).thenReturn("participant2");
         when(participant3.getEndpointId()).thenReturn("participant3");
-        SchismingHub hub = new SchismingHubImpl();
         hub.register(participant1);
         hub.register(participant2);
         hub.register(participant3);
@@ -56,5 +59,18 @@ public class SchismingStateIqTest {
                 "</schisminghub>" +
             "</iq>",
             result), true);
+    }
+
+    @NotNull
+    private Participant createParticipant(SchismingHub hub) {
+        Participant participant = new Participant(mock(JitsiMeetConference.class), mock(XmppChatMember.class), 10);
+
+        try {
+            doNothing().when(hub).sendState(participant);
+        } catch (SmackException.NotConnectedException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return participant;
     }
 }
