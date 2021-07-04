@@ -50,8 +50,13 @@ public class SchismingHubImpl implements SchismingHub {
             throw new ParticipantAlreadyRegisteredException(
                     "Unable to register Participant " + participant.toString() + ". Already registered.");
         }
-
-        addParticipantToNewGroup(participant);
+        if(schismingGroups.isEmpty()) {
+            addParticipantToNewGroup(participant);
+        } else {
+            SchismingGroup existingGroup = schismingGroups.get(0);
+            existingGroup.add(participant);
+            logger.info("Registered participant " + participant.toString() + " in group " + existingGroup.getId());
+        }
 
         sendState(participant);
     }
